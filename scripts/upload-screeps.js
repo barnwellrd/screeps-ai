@@ -12,7 +12,11 @@ function collectModules(rootDir, dir = rootDir) {
     }
     if (entry.isFile() && entry.name.endsWith('.js')) {
       const rel = path.relative(rootDir, full).replace(/\\/g, '/');
-      modules[rel] = fs.readFileSync(full, 'utf8');
+      const moduleName = rel.replace(/\.js$/, '');
+      modules[moduleName] = fs.readFileSync(full, 'utf8');
+      if (moduleName === 'main') {
+        modules['main.js'] = fs.readFileSync(full, 'utf8');
+      }
     }
   }
   return modules;
