@@ -23,6 +23,8 @@ jobs:
       - name: Build
         run: npm run build
       - name: Deploy to Screeps
+        if: ${{ secrets.SCREEPS_TOKEN != '' }}
+        continue-on-error: true
         env:
           SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
         run: |
