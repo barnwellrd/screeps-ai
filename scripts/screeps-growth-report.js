@@ -54,12 +54,26 @@ async function main() {
 
   const rooms = await requestJson(host, '/api/user/rooms', token);
   const roomNames = summarizeRoomsPayload(rooms.body);
+  const memory = await requestJson(host, '/api/user/memory', token);
+  let memoryRoomNames = [];
+  if (memory.status >= 200 && memory.status < 300 && memory.body && typeof memory.body.data === 'string') {
+    try {
+      const parsedMemory = JSON.parse(memory.body.data);
+      if (parsedMemory && parsedMemory.rooms && typeof parsedMemory.rooms === 'object') {
+        memoryRoomNames = Object.keys(parsedMemory.rooms);
+      }
+    } catch (e) {
+      memoryRoomNames = [];
+    }
+  }
   const user = auth.body && auth.body.username ? auth.body.username : 'unknown';
   const gcl = auth.body && auth.body.gcl !== undefined ? auth.body.gcl : 'unknown';
   const cpu = auth.body && auth.body.cpu !== undefined ? auth.body.cpu : 'unknown';
 
   console.log(
-    `[GROWTH_REPORT] user=${user} cpu=${cpu} gcl=${gcl} roomCount=${roomNames.length} rooms=${JSON.stringify(roomNames)}`
+    `[GROWTH_REPORT] user=${user} cpu=${cpu} gcl=${gcl} ` +
+      `apiRoomCount=${roomNames.length} apiRooms=${JSON.stringify(roomNames)} ` +
+      `memoryRoomCount=${memoryRoomNames.length} memoryRooms=${JSON.stringify(memoryRoomNames)}`
   );
 }
 
