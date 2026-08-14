@@ -59,6 +59,7 @@ async function main() {
   let memoryErrors = {};
   let runtimeErrors = [];
   let errorByShard = {};
+  let roadPlanner = {};
   if (memory.status >= 200 && memory.status < 300 && memory.body && typeof memory.body.data === 'string') {
     try {
       const parsedMemory = JSON.parse(memory.body.data);
@@ -74,6 +75,9 @@ async function main() {
       if (parsedMemory && parsedMemory.errorByShard && typeof parsedMemory.errorByShard === 'object') {
         errorByShard = parsedMemory.errorByShard;
       }
+      if (parsedMemory && parsedMemory.roadPlanner && typeof parsedMemory.roadPlanner === 'object') {
+        roadPlanner = parsedMemory.roadPlanner;
+      }
     } catch (e) {
       memoryRoomNames = [];
     }
@@ -88,7 +92,8 @@ async function main() {
       `memoryRoomCount=${memoryRoomNames.length} memoryRooms=${JSON.stringify(memoryRoomNames)} ` +
       `memoryErrors=${JSON.stringify(memoryErrors)} ` +
       `runtimeErrors=${JSON.stringify(runtimeErrors)} ` +
-      `errorByShard=${JSON.stringify(errorByShard)}`
+      `errorByShard=${JSON.stringify(errorByShard)} ` +
+      `roadPlanner=${JSON.stringify(roadPlanner)}`
   );
 }
 
