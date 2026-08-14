@@ -33,4 +33,5 @@ jobs:
             "path": "dist"
           }
           EOF
-          npx screeps upload --config screeps.json --path ./dist --branch default
+          set -x
+          npm_config_loglevel=verbose npx screeps upload --config screeps.json --path ./dist --branch default
