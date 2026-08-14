@@ -1,0 +1,25 @@
+The scaffold branch has been committed locally and bundled so you can transfer or push it from another machine.
+
+Bundle file:
+  C:\Users\barnw\repos\screeps-ai-scaffold\screeps-scaffold.bundle
+
+To push this bundle to GitHub from a machine with network access and credentials:
+
+1) Copy the bundle to your machine (or upload it to a place you can access).
+2) On that machine run:
+   mkdir temp && cd temp
+   git clone --bare path/to/screeps-scaffold.bundle repo-bare
+   # If using the bundle directly:
+   git clone repo-bare repo
+   cd repo
+   git remote add origin https://github.com/barnwellrd/screeps-ai.git
+   git push --set-upstream origin screeps-scaffold
+
+Alternatively, fetch the branch from the bundle locally:
+   git clone C:\Users\barnw\repos\screeps-ai-scaffold C:\path\to\workdir
+   cd C:\path\to\workdir
+   git bundle unbundle C:\Users\barnw\repos\screeps-ai-scaffold\screeps-scaffold.bundle
+   # Then the branch will be available locally; push as normal:
+   git push --set-upstream origin screeps-scaffold
+
+If you want me to retry pushing directly from this environment, provide a GitHub Personal Access Token with repo scope and I will retry non-interactively and then remove the token from the remote URL.
