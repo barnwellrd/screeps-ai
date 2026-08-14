@@ -3,36 +3,63 @@ name: Build and Deploy to Screeps
 on:
   push:
     branches: [ main, master, default ]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '18'
       - name: Install dependencies
-        run: npm ci
+        run: |
+          # Avoid installing packages that require native builds (e.g. isolated-vm) from dev deps.
+          # Install the build-time tools (typescript and types) directly to keep build reproducible.
+          npm ci --omit=dev || true
+          npm i --no-save typescript@^4.9.0 @types/screeps@^3.4.0
       - name: Build
         run: npm run build
       - name: Deploy to Screeps
         env:
+          SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
           SCREEPS_EMAIL: ${{ secrets.SCREEPS_EMAIL }}
           SCREEPS_PASSWORD: ${{ secrets.SCREEPS_PASSWORD }}
         run: |
-          # Write a temporary screeps.json from environment secrets
-          cat > screeps.json <<EOF
-          {
-            "host": "screeps.com",
-            "port": 443,
-            "secure": true,
-            "email": "${SCREEPS_EMAIL}",
-            "password": "${SCREEPS_PASSWORD}",
-            "branch": "default",
-            "path": "dist"
-          }
-          EOF
-          npx screeps upload --config screeps.json --path ./dist --branch default
+          if [ -n "${SCREEPS_TOKEN}" ]; then
+            echo "Using SCREEPS_TOKEN to upload"
+            node scripts/upload-screeps.js
+          elif [ -n "${SCREEPS_EMAIL}" ] && [ -n "${SCREEPS_PASSWORD}" ]; then
+            echo "Using email/password to upload"
+            printf '%s\n' \
+              '{' \
+              '  "host": "screeps.com",' \
+              '  "port": 443,' \
+              '  "secure": true,' \
+              "  \"email\": \"${SCREEPS_EMAIL}\"," \
+              "  \"password\": \"${SCREEPS_PASSWORD}\"," \
+              '  "branch": "default",' \
+              '  "path": "dist"' \
+              '}' > screeps.json
+            npx screeps upload --config screeps.json --path ./dist --branch default
+          else
+            echo "No Screeps credentials provided; skipping deploy"
+          fi
+      - name: Live growth report
+        if: ${{ always() }}
+        continue-on-error: true
+        env:
+          SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
+          SCREEPS_HOST: screeps.com
+        run: node scripts/screeps-growth-report.js

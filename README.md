@@ -2,6 +2,11 @@ screeps-ai scaffold
 
 This scaffold helps integrate a TypeScript project with Screeps and provides basic build and deploy scripts.
 
+AI agent quick reference
+
+- Review the Screeps docs at https://docs.screeps.com/
+- Use the focused API notes in [SCREEPS_API_AGENT_GUIDE.md](./SCREEPS_API_AGENT_GUIDE.md) before generating or editing game logic.
+
 How to use
 
 1. If you have the repository locally, copy the files from this scaffold into the repo root (or merge as needed).
@@ -13,6 +18,8 @@ How to use
 4. Build:
 
    npm run build
+
+   This also stamps [dist/main.js](C:/Users/barnw/repos/screeps-ai-scaffold.worktrees/game-state-analysis-upgraders-builders/dist/main.js) with a `// BUILD_TIMESTAMP: ...` comment at the top.
 
 5. Deploy to Screeps:
 
@@ -40,3 +47,5 @@ This repo now includes a few high-value automation patterns from the Screeps GPT
 - `.github/ISSUE_TEMPLATE/` gives bug reports and feature requests a consistent intake flow.
 
 These are intentionally lightweight and focused on a single-engineering workflow rather than a full multi-agent swarm.
+
+Updated by automated agent at 2026-08-13T23:12:50.8375385-04:00

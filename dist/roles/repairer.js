@@ -10,15 +10,17 @@ function run(creep) {
             (0, workerEnergy_1.tryAcquireEnergy)(creep);
             return;
         }
-        const target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
+        const target = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+            filter: (structure) => structure.hits < structure.hitsMax && structure.structureType !== STRUCTURE_WALL && structure.structureType !== STRUCTURE_RAMPART,
+        });
         if (!target) {
             const controller = creep.room.controller;
             if (controller) {
                 const upgradeResult = creep.upgradeController(controller);
-                if (upgradeResult == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(controller, { visualizePathStyle: { stroke: '#00ff99' } });
+                if (upgradeResult === ERR_NOT_IN_RANGE) {
+                    creep.moveTo(controller, { visualizePathStyle: { stroke: '#ffffff' } });
                 }
-                else if (upgradeResult == ERR_NOT_ENOUGH_RESOURCES) {
+                else if (upgradeResult === ERR_NOT_ENOUGH_RESOURCES) {
                     creep.memory.working = false;
                 }
             }
@@ -27,17 +29,17 @@ function run(creep) {
             }
             return;
         }
-        const buildResult = creep.build(target);
-        if (buildResult == ERR_NOT_IN_RANGE) {
+        const repairResult = creep.repair(target);
+        if (repairResult === ERR_NOT_IN_RANGE) {
             creep.moveTo(target, { visualizePathStyle: { stroke: '#00ff00' } });
         }
-        else if (buildResult == ERR_NOT_ENOUGH_RESOURCES) {
+        else if (repairResult === ERR_NOT_ENOUGH_RESOURCES) {
             creep.memory.working = false;
         }
     }
     catch (e) {
-        (0, runtimeErrors_1.recordRuntimeError)({ creep: creep.name, role: 'builder', error: e });
-        console.log(`builder ${creep.name} error: ${e}`);
+        (0, runtimeErrors_1.recordRuntimeError)({ creep: creep.name, role: 'repairer', error: e });
+        console.log(`repairer ${creep.name} error: ${e}`);
     }
 }
 exports.run = run;
