@@ -27,11 +27,11 @@ async function main() {
     process.exit(4);
   }
 
-  const postData = JSON.stringify({ branch, modules });
+  const postData = JSON.stringify({ modules });
 
   const options = {
     hostname: host,
-    path: '/api/user/code',
+    path: `/api/user/code?branch=${encodeURIComponent(branch)}`,
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -40,6 +40,7 @@ async function main() {
     },
   };
 
+  console.log(`SCREEPS_TOKEN present=${Boolean(token)} (length=${token ? token.length : 0})`);
   console.log(`Uploading ${Object.keys(modules).length} modules to ${host} branch=${branch}`);
 
   const req = https.request(options, (res) => {
