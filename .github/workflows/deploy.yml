@@ -6,10 +6,18 @@ on:
 
 jobs:
   build-and-deploy:
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -19,6 +27,7 @@ jobs:
       - name: Build
         run: npm run build
       - name: Deploy to Screeps
+        if: ${{ secrets.SCREEPS_EMAIL != '' && secrets.SCREEPS_PASSWORD != '' }}
         env:
           SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
         run: |
