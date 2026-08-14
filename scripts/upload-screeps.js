@@ -41,24 +41,53 @@ async function main() {
   };
 
   console.log(`SCREEPS_TOKEN present=${Boolean(token)} (length=${token ? token.length : 0})`);
-  console.log(`Uploading ${Object.keys(modules).length} modules to ${host} branch=${branch}`);
+  console.log(`Authenticating token at https://${host}/api/auth/me`);
 
-  const req = https.request(options, (res) => {
-    let data = '';
-    res.on('data', (chunk) => (data += chunk));
-    res.on('end', () => {
-      console.log('Status:', res.statusCode);
-      console.log('Response:', data);
-      if (res.statusCode >= 200 && res.statusCode < 300) process.exit(0);
-      process.exit(5);
+  // Verify token first
+  const authOptions = {
+    hostname: host,
+    path: '/api/auth/me',
+    method: 'GET',
+    headers: { 'X-Token': token },
+  };
+
+  const authReq = https.request(authOptions, (authRes) => {
+    let authData = '';
+    authRes.on('data', (c) => (authData += c));
+    authRes.on('end', () => {
+      console.log('Auth status:', authRes.statusCode);
+      console.log('Auth response:', authData);
+      if (authRes.statusCode < 200 || authRes.statusCode >= 300) {
+        console.error('Token validation failed - aborting upload');
+        process.exit(7);
+      }
+
+      // proceed to upload
+      console.log(`Uploading ${Object.keys(modules).length} modules to ${host} branch=${branch}`);
+
+      const req = https.request(options, (res) => {
+        let data = '';
+        res.on('data', (chunk) => (data += chunk));
+        res.on('end', () => {
+          console.log('Status:', res.statusCode);
+          console.log('Response:', data);
+          if (res.statusCode >= 200 && res.statusCode < 300) process.exit(0);
+          process.exit(5);
+        });
+      });
+      req.on('error', (e) => {
+        console.error('Request error:', e.message);
+        process.exit(6);
+      });
+      req.write(postData);
+      req.end();
     });
   });
-  req.on('error', (e) => {
-    console.error('Request error:', e.message);
-    process.exit(6);
+  authReq.on('error', (e) => {
+    console.error('Auth request error:', e.message);
+    process.exit(8);
   });
-  req.write(postData);
-  req.end();
+  authReq.end();
 }
 
 main();
