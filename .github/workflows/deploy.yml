@@ -24,7 +24,11 @@ jobs:
         with:
           node-version: '18'
       - name: Install dependencies
-        run: npm ci
+        run: |
+          # Avoid installing packages that require native builds (e.g. isolated-vm) from dev deps.
+          # Install the build-time tools (typescript and types) directly to keep build reproducible.
+          npm ci --omit=dev || true
+          npm i --no-save typescript@^4.9.0 @types/screeps@^3.4.0
       - name: Build
         run: npm run build
       - name: Deploy to Screeps
