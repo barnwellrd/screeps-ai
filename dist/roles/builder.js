@@ -11,7 +11,19 @@ function run(creep) {
         }
         const target = creep.pos.findClosestByPath(FIND_CONSTRUCTION_SITES);
         if (!target) {
-            creep.memory.working = false;
+            const controller = creep.room.controller;
+            if (controller) {
+                const upgradeResult = creep.upgradeController(controller);
+                if (upgradeResult == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(controller, { visualizePathStyle: { stroke: '#00ff99' } });
+                }
+                else if (upgradeResult == ERR_NOT_ENOUGH_RESOURCES) {
+                    creep.memory.working = false;
+                }
+            }
+            else {
+                creep.memory.working = false;
+            }
             return;
         }
         const buildResult = creep.build(target);

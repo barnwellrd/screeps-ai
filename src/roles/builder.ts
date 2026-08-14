@@ -10,7 +10,17 @@ export function run(creep: any) {
 
     const target = (creep.pos as any).findClosestByPath(FIND_CONSTRUCTION_SITES as any) as any;
     if (!target) {
-      creep.memory.working = false;
+      const controller = (creep.room as any).controller as any;
+      if (controller) {
+        const upgradeResult = (creep.upgradeController as any)(controller);
+        if (upgradeResult == ERR_NOT_IN_RANGE) {
+          (creep.moveTo as any)(controller, { visualizePathStyle: { stroke: '#00ff99' } });
+        } else if (upgradeResult == ERR_NOT_ENOUGH_RESOURCES) {
+          creep.memory.working = false;
+        }
+      } else {
+        creep.memory.working = false;
+      }
       return;
     }
     const buildResult = (creep.build as any)(target);

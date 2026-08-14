@@ -13,7 +13,17 @@ export function run(creep: any) {
     }) as any;
 
     if (!target) {
-      creep.memory.working = false;
+      const controller = creep.room.controller;
+      if (controller) {
+        const upgradeResult = (creep.upgradeController as any)(controller);
+        if (upgradeResult === ERR_NOT_IN_RANGE) {
+          (creep.moveTo as any)(controller, { visualizePathStyle: { stroke: '#ffffff' } });
+        } else if (upgradeResult === ERR_NOT_ENOUGH_RESOURCES) {
+          creep.memory.working = false;
+        }
+      } else {
+        creep.memory.working = false;
+      }
       return;
     }
 
