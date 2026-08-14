@@ -12,10 +12,21 @@ export const loop = function() {
       return;
     }
 
+    const roleCounts: Record<string, number> = {};
+    let workerEnergy = 0;
+    let harvesterEnergy = 0;
+
     for (const name in Game.creeps) {
       const creep: any = Game.creeps[name];
       try {
         const role = creep.memory.role || 'harvester';
+        roleCounts[role] = (roleCounts[role] || 0) + 1;
+        const creepEnergy = creep.store && creep.store.getUsedCapacity ? creep.store.getUsedCapacity(RESOURCE_ENERGY) : 0;
+        if (role === 'harvester') {
+          harvesterEnergy += creepEnergy;
+        } else {
+          workerEnergy += creepEnergy;
+        }
         switch (role) {
           case 'harvester':
             roleHarvester.run(creep);
@@ -38,6 +49,44 @@ export const loop = function() {
         if (!mem.errors) mem.errors = {};
         mem.errors[name] = (mem.errors[name] || 0) + 1;
       }
+    }
+
+    if ((Game.time as any) % 50 === 0) {
+      const roomSummaries: any[] = [];
+      for (const roomName in Game.rooms) {
+        const room: any = Game.rooms[roomName];
+        const structures = room.find(FIND_STRUCTURES as any) as any[];
+        let spawnExtensionFree = 0;
+        let spawnExtensionUsed = 0;
+        let storedEnergy = 0;
+
+        for (const s of structures) {
+          if (s.structureType == STRUCTURE_SPAWN || s.structureType == STRUCTURE_EXTENSION) {
+            spawnExtensionFree += s.store.getFreeCapacity(RESOURCE_ENERGY);
+            spawnExtensionUsed += s.store.getUsedCapacity(RESOURCE_ENERGY);
+          }
+          if (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) {
+            storedEnergy += s.store.getUsedCapacity(RESOURCE_ENERGY);
+          }
+        }
+
+        roomSummaries.push({
+          room: roomName,
+          spawnExtUsed: spawnExtensionUsed,
+          spawnExtFree: spawnExtensionFree,
+          storedEnergy,
+          constructionSites: room.find(FIND_CONSTRUCTION_SITES as any).length,
+          controllerProgress:
+            room.controller && room.controller.progressTotal
+              ? `${room.controller.progress}/${room.controller.progressTotal}`
+              : 'n/a',
+        });
+      }
+
+      info(
+        `[STATE] tick=${Game.time} roles=${JSON.stringify(roleCounts)} ` +
+          `harvesterEnergy=${harvesterEnergy} workerEnergy=${workerEnergy} rooms=${JSON.stringify(roomSummaries)}`
+      );
     }
   } catch (e) {
     // top-level catch to avoid uncaught exceptions
