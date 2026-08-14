@@ -11,12 +11,16 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Remove checked-in node_modules and lockfile\n        run: rm -rf node_modules package-lock.json || true\n      - name: Install Python 2 (for node-gyp)
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install Python 2 (for node-gyp)
         run: |
           sudo apt-get update
           sudo apt-get install -y python2
           sudo ln -sf /usr/bin/python2 /usr/bin/python
-      - name: Install dependencies
+- name: Install dependencies
         run: npm install typescript @types/screeps --no-save
       - name: Build
         run: npm run build
