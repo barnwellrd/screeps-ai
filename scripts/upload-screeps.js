@@ -13,9 +13,14 @@ function collectModules(rootDir, dir = rootDir) {
     if (entry.isFile() && entry.name.endsWith('.js')) {
       const rel = path.relative(rootDir, full).replace(/\\/g, '/');
       const moduleName = rel.replace(/\.js$/, '');
-      modules[moduleName] = fs.readFileSync(full, 'utf8');
+      const source = fs.readFileSync(full, 'utf8');
+      modules[moduleName] = source;
+      const shortName = path.basename(moduleName);
+      if (!modules[shortName]) {
+        modules[shortName] = source;
+      }
       if (moduleName === 'main') {
-        modules['main.js'] = fs.readFileSync(full, 'utf8');
+        modules['main.js'] = source;
       }
     }
   }
