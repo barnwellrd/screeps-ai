@@ -14,6 +14,8 @@ How to use
 
    npm run build
 
+   This also stamps [dist/main.js](C:/Users/barnw/repos/screeps-ai-scaffold.worktrees/game-state-analysis-upgraders-builders/dist/main.js) with a `// BUILD_TIMESTAMP: ...` comment at the top.
+
 5. Deploy to Screeps:
 
    npm run deploy
