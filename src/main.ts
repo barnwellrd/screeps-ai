@@ -3,7 +3,7 @@ import * as roleHarvester from './roles/harvester';
 import * as roleBuilder from './roles/builder';
 import * as roleUpgrader from './roles/upgrader';
 
-export const loop = function() {
+export function loop() {
   try {
     // Basic CPU safeguard: skip non-critical work if CPU is nearly exhausted
     const cpuUsed = (Game.cpu && (Game.cpu.getUsed as any) ? (Game.cpu.getUsed as any)() : 0);
@@ -43,9 +43,10 @@ export const loop = function() {
     // top-level catch to avoid uncaught exceptions
     console.log('Top-level loop error: ' + e);
   }
-};
+}
 
-// Expose global loop required by some loaders
+// Expose loop to Screeps runtime and legacy global loaders.
 declare const global: any;
-
+declare const module: any;
+module.exports.loop = loop;
 global.loop = loop;
