@@ -34,4 +34,4 @@ jobs:
           }
           EOF
           set -x
-          npm_config_loglevel=verbose npx screeps upload --config screeps.json --path ./dist --branch default
+          node scripts/upload-screeps.js
