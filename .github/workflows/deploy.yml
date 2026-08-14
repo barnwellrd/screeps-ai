@@ -20,17 +20,11 @@ jobs:
         run: npm run build
       - name: Deploy to Screeps
         env:
-          SCREEPS_EMAIL: ${{ secrets.SCREEPS_EMAIL }}
-          SCREEPS_PASSWORD: ${{ secrets.SCREEPS_PASSWORD }}
+          SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
         run: |
-          # Write a temporary screeps.json from environment secrets
           cat > screeps.json <<EOF
           {
-            "host": "screeps.com",
-            "port": 443,
-            "secure": true,
-            "email": "${SCREEPS_EMAIL}",
-            "password": "${SCREEPS_PASSWORD}",
+            "token": "${SCREEPS_TOKEN}",
             "branch": "default",
             "path": "dist"
           }
