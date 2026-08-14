@@ -1,0 +1,27 @@
+name: Build and Deploy to Screeps (API upload)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Deploy to Screeps via API
+        env:
+          SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
+        run: |
+          set -e
+          node -e "const fs=require('fs'); const path=require('path'); const dir='dist'; const modules={}; function walk(d){for(const f of fs.readdirSync(d)){const p=path.join(d,f); if(fs.statSync(p).isDirectory()){walk(p);} else {const rel=path.relative(dir,p).replace(/\\\\/g,'/'); modules[rel]=fs.readFileSync(p,'utf8');}}} walk(dir); const payload={branch:'default',modules:modules}; const data=JSON.stringify(payload); const url='https://screeps.com/api/user/code?token='+process.env.SCREEPS_TOKEN; const https=require('https'); const u=require('url'); const parsed=u.parse(url); const req=https.request({hostname:parsed.hostname, path:parsed.path, method:'POST', headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(data)}}, res=>{ let out=''; res.on('data',c=>out+=c); res.on('end',()=>{ console.log('status',res.statusCode); console.log(out); process.exit(res.statusCode===200?0:1); }); }); req.on('error',e=>{ console.error(e); process.exit(2); }); req.write(data); req.end();"
