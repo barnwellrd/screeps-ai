@@ -56,3 +56,10 @@ jobs:
           else
             echo "No Screeps credentials provided; skipping deploy"
           fi
+      - name: Live growth report
+        if: ${{ always() }}
+        continue-on-error: true
+        env:
+          SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
+          SCREEPS_HOST: screeps.com
+        run: node scripts/screeps-growth-report.js
