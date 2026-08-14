@@ -29,3 +29,5 @@ Notes and recommendations
 - If you prefer a different deploy tool (screeps-sync, @screeps/webpack-plugin, or a custom API integration), replace the deploy script and screeps.json accordingly.
 
 - To integrate this scaffold directly into the cloned repository, copy the screeps.json, package.json (merge dependencies/scripts), tsconfig.json, and src/ files into the repo root, then run npm install and test the build and deploy steps.
+
+Updated by automated agent at 2026-08-13T23:12:50.8375385-04:00
