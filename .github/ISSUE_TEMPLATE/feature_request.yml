@@ -1,0 +1,39 @@
+name: Feature request
+description: Suggest a useful improvement to the bot or development workflow.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the problem this feature solves and the goal it supports.
+
+  - type: input
+    id: title
+    attributes:
+      label: Feature summary
+      placeholder: e.g. Add room scouting and expansion heuristics
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      placeholder: |
+        - Bot identifies nearby rooms with suitable energy sources
+        - Expansion logic triggers at the correct RCL threshold
+        - Relevant docs are updated
