@@ -42,17 +42,16 @@ jobs:
             npx screeps upload --token "${SCREEPS_TOKEN}" --path ./dist --branch default
           elif [ -n "${SCREEPS_EMAIL}" ] && [ -n "${SCREEPS_PASSWORD}" ]; then
             echo "Using email/password to upload"
-            cat > screeps.json <<EOF
-            {
-              "host": "screeps.com",
-              "port": 443,
-              "secure": true,
-              "email": "${SCREEPS_EMAIL}",
-              "password": "${SCREEPS_PASSWORD}",
-              "branch": "default",
-              "path": "dist"
-            }
-            EOF
+            printf '%s\n' \
+              '{' \
+              '  "host": "screeps.com",' \
+              '  "port": 443,' \
+              '  "secure": true,' \
+              "  \"email\": \"${SCREEPS_EMAIL}\"," \
+              "  \"password\": \"${SCREEPS_PASSWORD}\"," \
+              '  "branch": "default",' \
+              '  "path": "dist"' \
+              '}' > screeps.json
             npx screeps upload --config screeps.json --path ./dist --branch default
           else
             echo "No Screeps credentials provided; skipping deploy"
