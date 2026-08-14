@@ -2,6 +2,11 @@ screeps-ai scaffold
 
 This scaffold helps integrate a TypeScript project with Screeps and provides basic build and deploy scripts.
 
+AI agent quick reference
+
+- Review the Screeps docs at https://docs.screeps.com/
+- Use the focused API notes in [SCREEPS_API_AGENT_GUIDE.md](./SCREEPS_API_AGENT_GUIDE.md) before generating or editing game logic.
+
 How to use
 
 1. If you have the repository locally, copy the files from this scaffold into the repo root (or merge as needed).
