@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = void 0;
 const workerEnergy_1 = require("./workerEnergy");
+const runtimeErrors_1 = require("./runtimeErrors");
 function run(creep) {
     try {
         (0, workerEnergy_1.updateWorkingState)(creep);
@@ -37,6 +38,7 @@ function run(creep) {
         }
     }
     catch (e) {
+        (0, runtimeErrors_1.recordRuntimeError)({ creep: creep.name, role: 'repairer', error: e });
         console.log(`repairer ${creep.name} error: ${e}`);
     }
 }

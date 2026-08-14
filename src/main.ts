@@ -5,6 +5,7 @@ import * as roleUpgrader from './roles/upgrader';
 import * as roleRepairer from './roles/repairer';
 import * as roleDefender from './roles/defender';
 import * as roleClaimer from './roles/claimer';
+import { recordRuntimeError } from './roles/runtimeErrors';
 
 type RoleName = 'harvester' | 'builder' | 'upgrader' | 'repairer' | 'defender' | 'claimer';
 
@@ -138,6 +139,15 @@ function desiredRoleCounts(room: Room): Record<RoleName, number> {
   return desired;
 }
 
+function summarizeRuntimeErrors(): string {
+  const mem: any = Memory as any;
+  const runtimeErrors = Array.isArray(mem.runtimeErrors) ? mem.runtimeErrors : [];
+  if (runtimeErrors.length === 0) {
+    return '[]';
+  }
+  return JSON.stringify(runtimeErrors.slice(-5));
+}
+
 function spawnCreep(spawn: StructureSpawn, role: RoleName, room: Room): boolean {
   const body = getBodyPartsForRole(role, room);
   if (!body) return false;
@@ -246,9 +256,7 @@ export function loop() {
         }
       } catch (e) {
         error(`Error running creep ${name}: ${e}`);
-        const mem: any = (Memory as any);
-        if (!mem.errors) mem.errors = {};
-        mem.errors[name] = (mem.errors[name] || 0) + 1;
+        recordRuntimeError({ creep: name, role: creep.memory.role || 'unknown', error: e });
       }
     }
 
@@ -289,11 +297,13 @@ export function loop() {
         `[STATE] tick=${Game.time} roles=${JSON.stringify(roleCounts)} ` +
           `harvesterEnergy=${harvesterEnergy} workerEnergy=${workerEnergy} rooms=${JSON.stringify(roomSummaries)}`
       );
+      info(`[ERRORS] shard=${(Game as any).shard ? (Game as any).shard.name : 'unknown'} recent=${summarizeRuntimeErrors()}`);
     }
   } catch (e) {
+    recordRuntimeError({ role: 'main', error: e });
     console.log('Top-level loop error: ' + e);
   }
-}
+};
 
 declare const global: any;
 declare const module: any;

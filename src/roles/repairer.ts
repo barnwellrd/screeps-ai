@@ -1,4 +1,5 @@
 import { tryAcquireEnergy, updateWorkingState } from './workerEnergy';
+import { recordRuntimeError } from './runtimeErrors';
 
 export function run(creep: any) {
   try {
@@ -34,6 +35,7 @@ export function run(creep: any) {
       creep.memory.working = false;
     }
   } catch (e) {
+    recordRuntimeError({ creep: creep.name, role: 'repairer', error: e });
     console.log(`repairer ${creep.name} error: ${e}`);
   }
 }

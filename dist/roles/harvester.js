@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.run = void 0;
+const runtimeErrors_1 = require("./runtimeErrors");
 function run(creep) {
     try {
         // If harvester has space, harvest
@@ -74,6 +75,7 @@ function run(creep) {
         }
     }
     catch (e) {
+        (0, runtimeErrors_1.recordRuntimeError)({ creep: creep.name, role: 'harvester', error: e });
         console.log(`harvester ${creep.name} error: ${e}`);
     }
 }

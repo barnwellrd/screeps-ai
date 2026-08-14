@@ -1,3 +1,5 @@
+import { recordRuntimeError } from './runtimeErrors';
+
 export function run(creep: any) {
   try {
     const hostile = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS) as any;
@@ -13,6 +15,7 @@ export function run(creep: any) {
       (creep.moveTo as any)(hostile, { visualizePathStyle: { stroke: '#ff0000' } });
     }
   } catch (e) {
+    recordRuntimeError({ creep: creep.name, role: 'defender', error: e });
     console.log(`defender ${creep.name} error: ${e}`);
   }
 }

@@ -1,3 +1,5 @@
+import { recordRuntimeError } from './runtimeErrors';
+
 export function run(creep: any) {
   try {
     // If harvester has space, harvest
@@ -75,6 +77,7 @@ export function run(creep: any) {
       }
     }
   } catch (e) {
+    recordRuntimeError({ creep: creep.name, role: 'harvester', error: e });
     console.log(`harvester ${creep.name} error: ${e}`);
   }
 }

@@ -57,6 +57,8 @@ async function main() {
   const memory = await requestJson(host, '/api/user/memory', token);
   let memoryRoomNames = [];
   let memoryErrors = {};
+  let runtimeErrors = [];
+  let errorByShard = {};
   if (memory.status >= 200 && memory.status < 300 && memory.body && typeof memory.body.data === 'string') {
     try {
       const parsedMemory = JSON.parse(memory.body.data);
@@ -65,6 +67,12 @@ async function main() {
       }
       if (parsedMemory && parsedMemory.errors && typeof parsedMemory.errors === 'object') {
         memoryErrors = parsedMemory.errors;
+      }
+      if (parsedMemory && Array.isArray(parsedMemory.runtimeErrors)) {
+        runtimeErrors = parsedMemory.runtimeErrors.slice(-5);
+      }
+      if (parsedMemory && parsedMemory.errorByShard && typeof parsedMemory.errorByShard === 'object') {
+        errorByShard = parsedMemory.errorByShard;
       }
     } catch (e) {
       memoryRoomNames = [];
@@ -78,7 +86,9 @@ async function main() {
     `[GROWTH_REPORT] user=${user} cpu=${cpu} gcl=${gcl} ` +
       `apiRoomCount=${roomNames.length} apiRooms=${JSON.stringify(roomNames)} ` +
       `memoryRoomCount=${memoryRoomNames.length} memoryRooms=${JSON.stringify(memoryRoomNames)} ` +
-      `memoryErrors=${JSON.stringify(memoryErrors)}`
+      `memoryErrors=${JSON.stringify(memoryErrors)} ` +
+      `runtimeErrors=${JSON.stringify(runtimeErrors)} ` +
+      `errorByShard=${JSON.stringify(errorByShard)}`
   );
 }
 

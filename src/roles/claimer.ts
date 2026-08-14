@@ -1,3 +1,5 @@
+import { recordRuntimeError } from './runtimeErrors';
+
 export function run(creep: any) {
   try {
     let targetRoom = creep.memory.targetRoom as string | undefined;
@@ -34,6 +36,7 @@ export function run(creep: any) {
       (creep.moveTo as any)(target, { visualizePathStyle: { stroke: '#00ffff' } });
     }
   } catch (e) {
+    recordRuntimeError({ creep: creep.name, role: 'claimer', error: e });
     console.log(`claimer ${creep.name} error: ${e}`);
   }
 }

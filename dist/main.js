@@ -1,4 +1,4 @@
-// BUILD_TIMESTAMP: 2026-08-14T16:06:58.400Z
+// BUILD_TIMESTAMP: 2026-08-14T16:12:12.113Z
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -32,6 +32,7 @@ const roleUpgrader = __importStar(require("./roles/upgrader"));
 const roleRepairer = __importStar(require("./roles/repairer"));
 const roleDefender = __importStar(require("./roles/defender"));
 const roleClaimer = __importStar(require("./roles/claimer"));
+const runtimeErrors_1 = require("./roles/runtimeErrors");
 function getMyUsername() {
     for (const roomName in Game.rooms) {
         const room = Game.rooms[roomName];
@@ -146,6 +147,14 @@ function desiredRoleCounts(room) {
     };
     return desired;
 }
+function summarizeRuntimeErrors() {
+    const mem = Memory;
+    const runtimeErrors = Array.isArray(mem.runtimeErrors) ? mem.runtimeErrors : [];
+    if (runtimeErrors.length === 0) {
+        return '[]';
+    }
+    return JSON.stringify(runtimeErrors.slice(-5));
+}
 function spawnCreep(spawn, role, room) {
     const body = getBodyPartsForRole(role, room);
     if (!body)
@@ -254,10 +263,7 @@ function loop() {
             }
             catch (e) {
                 (0, logger_1.error)(`Error running creep ${name}: ${e}`);
-                const mem = Memory;
-                if (!mem.errors)
-                    mem.errors = {};
-                mem.errors[name] = (mem.errors[name] || 0) + 1;
+                (0, runtimeErrors_1.recordRuntimeError)({ creep: name, role: creep.memory.role || 'unknown', error: e });
             }
         }
         if (Game.time % 50 === 0) {
@@ -291,12 +297,15 @@ function loop() {
             }
             (0, logger_1.info)(`[STATE] tick=${Game.time} roles=${JSON.stringify(roleCounts)} ` +
                 `harvesterEnergy=${harvesterEnergy} workerEnergy=${workerEnergy} rooms=${JSON.stringify(roomSummaries)}`);
+            (0, logger_1.info)(`[ERRORS] shard=${Game.shard ? Game.shard.name : 'unknown'} recent=${summarizeRuntimeErrors()}`);
         }
     }
     catch (e) {
+        (0, runtimeErrors_1.recordRuntimeError)({ role: 'main', error: e });
         console.log('Top-level loop error: ' + e);
     }
 }
 exports.loop = loop;
+;
 module.exports.loop = loop;
 global.loop = loop;
