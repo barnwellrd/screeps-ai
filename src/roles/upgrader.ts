@@ -1,4 +1,4 @@
-import { tryAcquireEnergy, updateWorkingState } from '../lib/workerEnergy';
+import { tryAcquireEnergy, updateWorkingState } from './workerEnergy';
 
 export function run(creep: any) {
   try {
