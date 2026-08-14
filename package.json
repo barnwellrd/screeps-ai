@@ -8,10 +8,8 @@
     "deploy": "npx screeps upload --config screeps.json --path ./dist --branch default",
     "dev": "tsc -w -p tsconfig.json"
   },
-  "dependencies": {
-    "screeps": "^5.0.0"
-  },
   "devDependencies": {
+    "@types/screeps": "^3.4.0",
     "typescript": "^4.9.0"
   }
 }

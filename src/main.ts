@@ -34,8 +34,9 @@ export const loop = function() {
       } catch (e) {
         error(`Error running creep ${name}: ${e}`);
         // store last error in Memory for later inspection
-        if (!Memory.errors) Memory.errors = {} as any;
-        Memory.errors[name] = (Memory.errors[name] || 0) + 1;
+        const mem: any = (Memory as any);
+        if (!mem.errors) mem.errors = {};
+        mem.errors[name] = (mem.errors[name] || 0) + 1;
       }
     }
   } catch (e) {
@@ -45,8 +46,6 @@ export const loop = function() {
 };
 
 // Expose global loop required by some loaders
-declare global {
-  interface Global { loop: () => void }
-}
+declare const global: any;
 
 global.loop = loop;
