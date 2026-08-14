@@ -1,0 +1,38 @@
+name: Build and Deploy to Screeps
+
+on:
+  push:
+    branches: [ main, master, default ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+      - name: Deploy to Screeps
+        env:
+          SCREEPS_EMAIL: ${{ secrets.SCREEPS_EMAIL }}
+          SCREEPS_PASSWORD: ${{ secrets.SCREEPS_PASSWORD }}
+        run: |
+          # Write a temporary screeps.json from environment secrets
+          cat > screeps.json <<EOF
+          {
+            "host": "screeps.com",
+            "port": 443,
+            "secure": true,
+            "email": "${SCREEPS_EMAIL}",
+            "password": "${SCREEPS_PASSWORD}",
+            "branch": "default",
+            "path": "dist"
+          }
+          EOF
+          npx screeps upload --config screeps.json --path ./dist --branch default

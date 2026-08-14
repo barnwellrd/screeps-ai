@@ -1,0 +1,9 @@
+{
+  "host": "screeps.com",
+  "port": 443,
+  "secure": true,
+  "email": "your-email@example.com",
+  "password": "YOUR_PASSWORD_OR_TOKEN",
+  "branch": "default",
+  "path": "dist"
+}

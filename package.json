@@ -1,0 +1,17 @@
+{
+  "name": "screeps-ai-scaffold",
+  "version": "0.1.0",
+  "description": "Scaffold for integrating code with Screeps and deploying/syncing code to a Screeps server",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "predeploy": "npm run build",
+    "deploy": "npx screeps upload --config screeps.json --path ./dist --branch default",
+    "dev": "tsc -w -p tsconfig.json"
+  },
+  "dependencies": {
+    "screeps": "^5.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.0"
+  }
+}
