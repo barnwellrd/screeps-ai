@@ -39,7 +39,7 @@ jobs:
         run: |
           if [ -n "${SCREEPS_TOKEN}" ]; then
             echo "Using SCREEPS_TOKEN to upload"
-            npx screeps upload --token "${SCREEPS_TOKEN}" --path ./dist --branch default
+            node scripts/upload-screeps.js
           elif [ -n "${SCREEPS_EMAIL}" ] && [ -n "${SCREEPS_PASSWORD}" ]; then
             echo "Using email/password to upload"
             printf '%s\n' \
