@@ -2,6 +2,22 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
+function collectModules(rootDir, dir = rootDir) {
+  const modules = {};
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      Object.assign(modules, collectModules(rootDir, full));
+      continue;
+    }
+    if (entry.isFile() && entry.name.endsWith('.js')) {
+      const rel = path.relative(rootDir, full).replace(/\\/g, '/');
+      modules[rel] = fs.readFileSync(full, 'utf8');
+    }
+  }
+  return modules;
+}
+
 async function main() {
   const token = process.env.SCREEPS_TOKEN;
   if (!token) {
@@ -15,19 +31,14 @@ async function main() {
     console.error('dist directory not found:', dist);
     process.exit(3);
   }
-  const modules = {};
-  const files = fs.readdirSync(dist);
-  for (const f of files) {
-    if (f.endsWith('.js')) {
-      modules[f] = fs.readFileSync(path.join(dist, f), 'utf8');
-    }
-  }
+  const modules = collectModules(dist);
   if (Object.keys(modules).length === 0) {
     console.error('No .js modules found in dist/');
     process.exit(4);
   }
 
-  const postData = JSON.stringify({ modules });
+  const payload = { branch, modules };
+  const postData = JSON.stringify(payload);
 
   const options = {
     hostname: host,
