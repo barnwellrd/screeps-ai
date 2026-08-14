@@ -32,7 +32,6 @@ jobs:
       - name: Build
         run: npm run build
       - name: Deploy to Screeps
-        if: ${{ secrets.SCREEPS_TOKEN != '' || (secrets.SCREEPS_EMAIL != '' && secrets.SCREEPS_PASSWORD != '') }}
         env:
           SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
           SCREEPS_EMAIL: ${{ secrets.SCREEPS_EMAIL }}
