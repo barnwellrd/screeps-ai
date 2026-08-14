@@ -1,3 +1,4 @@
+// BUILD_TIMESTAMP: 2026-08-14T14:31:21.575Z
 "use strict";
 function info(msg){console.log('[INFO] '+msg);}function warn(msg){console.log('[WARN] '+msg);}function error(msg){console.log('[ERROR] '+msg);} 
 var roleHarvester = { run: function(creep){ try{ var source = creep.pos.findClosestByPath(FIND_SOURCES); if(!source) return; if(creep.store.getFreeCapacity()>0){ if(creep.harvest(source)===ERR_NOT_IN_RANGE){ creep.moveTo(source,{visualizePathStyle:{stroke:'#ffaa00'}}); } } else { var target = creep.pos.findClosestByPath(FIND_STRUCTURES, { filter: function(s){ return (s.structureType==STRUCTURE_SPAWN || s.structureType==STRUCTURE_EXTENSION) && s.store.getFreeCapacity(RESOURCE_ENERGY)>0; } }); if(target){ if(creep.transfer(target, RESOURCE_ENERGY)===ERR_NOT_IN_RANGE){ creep.moveTo(target,{visualizePathStyle:{stroke:'#ffffff'}}); } } } }catch(e){ console.log('harvester '+(creep.name||'')+' error: '+e);} } };
