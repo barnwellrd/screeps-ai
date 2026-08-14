@@ -1,13 +1,14 @@
 export function run(creep: any) {
   try {
     let targetRoom = creep.memory.targetRoom as string | undefined;
+    const myUsername = creep.owner && creep.owner.username ? creep.owner.username : null;
     if (!targetRoom) {
       const exits = Game.map.describeExits(creep.room.name) as Record<string, string>;
       for (const dir of Object.keys(exits)) {
         const roomName = exits[dir];
         const exitRoom = Game.rooms[roomName];
         if (!exitRoom || !exitRoom.controller) continue;
-        if (!exitRoom.controller.owner && (!exitRoom.controller.reservation || exitRoom.controller.reservation.username !== creep.owner.username)) {
+        if (!exitRoom.controller.owner && (!exitRoom.controller.reservation || exitRoom.controller.reservation.username !== myUsername)) {
           targetRoom = roomName;
           creep.memory.targetRoom = roomName;
           break;

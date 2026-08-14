@@ -56,11 +56,15 @@ async function main() {
   const roomNames = summarizeRoomsPayload(rooms.body);
   const memory = await requestJson(host, '/api/user/memory', token);
   let memoryRoomNames = [];
+  let memoryErrors = {};
   if (memory.status >= 200 && memory.status < 300 && memory.body && typeof memory.body.data === 'string') {
     try {
       const parsedMemory = JSON.parse(memory.body.data);
       if (parsedMemory && parsedMemory.rooms && typeof parsedMemory.rooms === 'object') {
         memoryRoomNames = Object.keys(parsedMemory.rooms);
+      }
+      if (parsedMemory && parsedMemory.errors && typeof parsedMemory.errors === 'object') {
+        memoryErrors = parsedMemory.errors;
       }
     } catch (e) {
       memoryRoomNames = [];
@@ -73,7 +77,8 @@ async function main() {
   console.log(
     `[GROWTH_REPORT] user=${user} cpu=${cpu} gcl=${gcl} ` +
       `apiRoomCount=${roomNames.length} apiRooms=${JSON.stringify(roomNames)} ` +
-      `memoryRoomCount=${memoryRoomNames.length} memoryRooms=${JSON.stringify(memoryRoomNames)}`
+      `memoryRoomCount=${memoryRoomNames.length} memoryRooms=${JSON.stringify(memoryRoomNames)} ` +
+      `memoryErrors=${JSON.stringify(memoryErrors)}`
   );
 }
 
