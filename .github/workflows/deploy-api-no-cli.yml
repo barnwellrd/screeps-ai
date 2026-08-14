@@ -15,11 +15,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      - name: Install Python 2 (for node-gyp)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python2
-          sudo ln -sf /usr/bin/python2 /usr/bin/python
 - name: Install dependencies
         run: npm install typescript @types/screeps --no-save
       - name: Build
