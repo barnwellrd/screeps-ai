@@ -1,0 +1,33 @@
+name: Build and Deploy to Screeps (token)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build
+      - name: Deploy to Screeps
+        env:
+          SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
+        run: |
+          cat > screeps.json <<EOF
+          {
+            "token": "${SCREEPS_TOKEN}",
+            "branch": "default",
+            "path": "dist"
+          }
+          EOF
+          npx screeps upload --config screeps.json --path ./dist --branch default
