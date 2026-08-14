@@ -7,27 +7,21 @@ export function run(creep: any) {
 
     // If not working and have no energy, try to harvest/get energy
     if (!creep.memory.working && creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
-      // Try to get energy from source, container, or storage
-      let target = (creep.pos as any).findClosestByPath(FIND_STRUCTURES as any, {
-        filter: (s: any) => (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) && s.store.getAmount(RESOURCE_ENERGY) > 0
+      const containerTarget = (creep.pos as any).findClosestByPath(FIND_STRUCTURES as any, {
+        filter: (s: any) => (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) && s.store.getUsedCapacity(RESOURCE_ENERGY) > 0
       }) as any;
 
-      if (!target) {
-        // If no container/storage, try to harvest from source directly
-        target = (creep.pos as any).findClosestByPath(FIND_SOURCES as any) as any;
+      if (containerTarget) {
+        if ((creep.withdraw as any)(containerTarget, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+          (creep.moveTo as any)(containerTarget, { visualizePathStyle: { stroke: '#ffaa00' } });
+        }
+        return;
       }
 
-      if (target) {
-        if ((target.harvest as any)) {
-          // It's a source
-          if ((creep.harvest as any)(target) == ERR_NOT_IN_RANGE) {
-            (creep.moveTo as any)(target, { visualizePathStyle: { stroke: '#ffaa00' } });
-          }
-        } else {
-          // It's a container/storage - withdraw energy
-          if ((creep.withdraw as any)(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-            (creep.moveTo as any)(target, { visualizePathStyle: { stroke: '#ffaa00' } });
-          }
+      const source = (creep.pos as any).findClosestByPath(FIND_SOURCES as any) as any;
+      if (source) {
+        if ((creep.harvest as any)(source) == ERR_NOT_IN_RANGE) {
+          (creep.moveTo as any)(source, { visualizePathStyle: { stroke: '#ffaa00' } });
         }
       }
       return;
