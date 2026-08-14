@@ -37,8 +37,6 @@ This repo now includes a few high-value automation patterns from the Screeps GPT
 - `AGENTS.md` centralizes repository instructions for Copilot and automation agents.
 - `.github/copilot-instructions.md` sets project-specific coding rules and validation expectations.
 - `.github/copilot-environment.json` configures a reusable Copilot runtime with Node 22 and `npm ci` setup.
-- `.github/workflows/copilot-setup-steps.yml` ensures the agent environment is prepared before tasks run.
-- `.github/workflows/ci-quality.yml` runs a build gate on push and pull request so broken changes are caught early.
 - `.github/ISSUE_TEMPLATE/` gives bug reports and feature requests a consistent intake flow.
 
 These are intentionally lightweight and focused on a single-engineering workflow rather than a full multi-agent swarm.
