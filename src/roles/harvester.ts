@@ -11,9 +11,13 @@ export function run(creep: any) {
       // Harvester is full - try to distribute energy to multiple targets
       let transferred = false;
 
-      // Priority 1: Try spawn/extension
+      // Priority 1: Try spawn/extension/tower refill
       const spawn = (creep.pos as any).findClosestByPath(FIND_STRUCTURES as any, {
-        filter: (s: any) => (s.structureType == STRUCTURE_SPAWN || s.structureType == STRUCTURE_EXTENSION) && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+        filter: (s: any) =>
+          (s.structureType == STRUCTURE_SPAWN ||
+            s.structureType == STRUCTURE_EXTENSION ||
+            s.structureType == STRUCTURE_TOWER) &&
+          s.store.getFreeCapacity(RESOURCE_ENERGY) > 0
       }) as any;
       if (spawn) {
         if ((creep.transfer as any)(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -48,13 +52,25 @@ export function run(creep: any) {
         }
       }
 
-      // Priority 4: Direct transfer to nearby builder/upgrader if very close
+      // Priority 4: Direct transfer to nearby workers
       if (!transferred) {
         const ally = (creep.pos as any).findClosestByPath(FIND_MY_CREEPS as any, {
-          filter: (c: any) => (c.memory.role == 'builder' || c.memory.role == 'upgrader') && c.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+          filter: (c: any) =>
+            (c.memory.role == 'builder' || c.memory.role == 'upgrader' || c.memory.role == 'repairer') &&
+            c.store.getFreeCapacity(RESOURCE_ENERGY) > 0
         }) as any;
-        if (ally && (creep.pos as any).getRangeTo(ally) <= 1) {
-          (creep.transfer as any)(ally, RESOURCE_ENERGY);
+        if (ally) {
+          if ((creep.transfer as any)(ally, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            (creep.moveTo as any)(ally, { visualizePathStyle: { stroke: '#ffff00' } });
+          }
+          transferred = true;
+        }
+      }
+
+      if (!transferred) {
+        const idleAnchor = creep.room.controller || Game.spawns[Object.keys(Game.spawns)[0]];
+        if (idleAnchor) {
+          (creep.moveTo as any)(idleAnchor, { visualizePathStyle: { stroke: '#ffff00' } });
         }
       }
     }

@@ -15,9 +15,12 @@ function run(creep) {
         else {
             // Harvester is full - try to distribute energy to multiple targets
             let transferred = false;
-            // Priority 1: Try spawn/extension
+            // Priority 1: Try spawn/extension/tower refill
             const spawn = creep.pos.findClosestByPath(FIND_STRUCTURES, {
-                filter: (s) => (s.structureType == STRUCTURE_SPAWN || s.structureType == STRUCTURE_EXTENSION) && s.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                filter: (s) => (s.structureType == STRUCTURE_SPAWN ||
+                    s.structureType == STRUCTURE_EXTENSION ||
+                    s.structureType == STRUCTURE_TOWER) &&
+                    s.store.getFreeCapacity(RESOURCE_ENERGY) > 0
             });
             if (spawn) {
                 if (creep.transfer(spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -49,13 +52,23 @@ function run(creep) {
                     transferred = true;
                 }
             }
-            // Priority 4: Direct transfer to nearby builder/upgrader if very close
+            // Priority 4: Direct transfer to nearby workers
             if (!transferred) {
                 const ally = creep.pos.findClosestByPath(FIND_MY_CREEPS, {
-                    filter: (c) => (c.memory.role == 'builder' || c.memory.role == 'upgrader') && c.store.getFreeCapacity(RESOURCE_ENERGY) > 0
+                    filter: (c) => (c.memory.role == 'builder' || c.memory.role == 'upgrader' || c.memory.role == 'repairer') &&
+                        c.store.getFreeCapacity(RESOURCE_ENERGY) > 0
                 });
-                if (ally && creep.pos.getRangeTo(ally) <= 1) {
-                    creep.transfer(ally, RESOURCE_ENERGY);
+                if (ally) {
+                    if (creep.transfer(ally, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(ally, { visualizePathStyle: { stroke: '#ffff00' } });
+                    }
+                    transferred = true;
+                }
+            }
+            if (!transferred) {
+                const idleAnchor = creep.room.controller || Game.spawns[Object.keys(Game.spawns)[0]];
+                if (idleAnchor) {
+                    creep.moveTo(idleAnchor, { visualizePathStyle: { stroke: '#ffff00' } });
                 }
             }
         }
