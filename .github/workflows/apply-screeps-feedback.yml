@@ -30,7 +30,7 @@ jobs:
           git apply --check approved-feedback.patch
           git apply approved-feedback.patch
       - name: Install dependencies
-        run: npm install --include=dev
+        run: npm install --no-save typescript@4.9.5 @types/screeps@3.4.0
       - name: Validate changes
         run: npm run build
       - name: Create remediation branch
