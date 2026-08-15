@@ -85,6 +85,29 @@ async function loadApprovedFeedback(apiUrl, headers) {
   return feedback;
 }
 
+async function ensureLabel(apiUrl, headers, name, description, color) {
+  const response = await fetch(`${apiUrl}/labels/${encodeURIComponent(name)}`, { headers });
+  if (response.ok) {
+    return;
+  }
+  if (response.status !== 404) {
+    throw new Error(
+      `GET ${apiUrl}/labels/${name} failed (${response.status}): ${await response.text()}`
+    );
+  }
+
+  const createResponse = await fetch(`${apiUrl}/labels`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ name, description, color })
+  });
+  if (!createResponse.ok) {
+    throw new Error(
+      `POST ${apiUrl}/labels failed (${createResponse.status}): ${await createResponse.text()}`
+    );
+  }
+}
+
 async function loadLiveRooms(host, screepsToken, projections) {
   const headers = {
     'Content-Type': 'application/json',
@@ -273,6 +296,20 @@ async function main() {
     'X-GitHub-Api-Version': '2022-11-28',
     'Content-Type': 'application/json'
   };
+  await ensureLabel(
+    apiUrl,
+    githubHeaders,
+    DEFICIT_LABEL,
+    'Screeps live status is below a configured projection',
+    'd93f0b'
+  );
+  await ensureLabel(
+    apiUrl,
+    githubHeaders,
+    FEEDBACK_LABEL,
+    'Approved Screeps remediation feedback',
+    '0e8a16'
+  );
   const feedback = await loadApprovedFeedback(apiUrl, githubHeaders);
   for (const deficit of deficits) {
     await upsertDeficitIssue(apiUrl, githubHeaders, deficit, feedback, dryRun);
