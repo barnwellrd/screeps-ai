@@ -77,3 +77,5 @@ The status workflow provisions both required labels when it detects a deficit.
 The status-check workflow never deploys or changes the live Screeps branch
 automatically. The deployment workflow runs after the validated remediation has
 been merged.
+
+The guarded remediation workflow is validated through a pull request before it merges.
