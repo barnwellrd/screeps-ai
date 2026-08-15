@@ -72,6 +72,7 @@ result to the issue. Feedback which changes workflow, dependency, or deployment
 files is rejected to prevent a feedback item from expanding its own permissions.
 The repository must permit GitHub Actions to create and merge pull requests for
 the final merge step to succeed.
+The status workflow provisions both required labels when it detects a deficit.
 
 The status-check workflow never deploys or changes the live Screeps branch
 automatically. The deployment workflow runs after the validated remediation has
