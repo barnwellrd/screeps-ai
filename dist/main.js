@@ -1,4 +1,4 @@
-// BUILD_TIMESTAMP: 2026-08-15T14:32:28.725Z
+// BUILD_TIMESTAMP: 2026-08-15T23:38:29.876Z
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -33,6 +33,46 @@ const roleRepairer = __importStar(require("./roles/repairer"));
 const roleDefender = __importStar(require("./roles/defender"));
 const roleClaimer = __importStar(require("./roles/claimer"));
 const runtimeErrors_1 = require("./roles/runtimeErrors");
+const roomState_1 = require("./lib/roomState");
+const BODY_RECIPES = {
+    harvester: [
+        [WORK, WORK, CARRY, MOVE],
+        [WORK, CARRY, MOVE],
+        [WORK, MOVE],
+        [WORK],
+        [MOVE],
+    ],
+    builder: [
+        [WORK, WORK, CARRY, MOVE],
+        [WORK, CARRY, MOVE],
+        [WORK, MOVE],
+        [WORK],
+        [MOVE],
+    ],
+    upgrader: [
+        [WORK, WORK, CARRY, MOVE],
+        [WORK, CARRY, MOVE],
+        [WORK, MOVE],
+        [WORK],
+        [MOVE],
+    ],
+    repairer: [
+        [WORK, WORK, CARRY, MOVE],
+        [WORK, CARRY, MOVE],
+        [WORK, MOVE],
+        [WORK],
+        [MOVE],
+    ],
+    defender: [
+        [TOUGH, ATTACK, MOVE],
+        [TOUGH, MOVE],
+        [ATTACK, MOVE],
+        [MOVE],
+    ],
+    claimer: [
+        [CLAIM, MOVE],
+    ],
+};
 function getMyUsername() {
     for (const roomName in Game.rooms) {
         const room = Game.rooms[roomName];
@@ -42,37 +82,37 @@ function getMyUsername() {
     }
     return null;
 }
+function bodyCost(parts) {
+    return parts.reduce((sum, part) => sum + BODYPART_COST[part], 0);
+}
+function getIdealBodyPartCount(role, room) {
+    const body = getBodyPartsForRole(role, room);
+    return body ? body.length : 0;
+}
 function getBodyPartsForRole(role, room) {
     const maxEnergy = room.energyCapacityAvailable || room.energyAvailable || 300;
-    const patternMap = {
-        harvester: [WORK, WORK, CARRY, MOVE],
-        builder: [WORK, WORK, CARRY, MOVE],
-        upgrader: [WORK, WORK, CARRY, MOVE],
-        repairer: [WORK, WORK, CARRY, MOVE],
-        defender: [TOUGH, ATTACK, MOVE, MOVE],
-        claimer: [CLAIM, MOVE],
-    };
-    const pattern = patternMap[role];
-    const minBodyMap = {
-        harvester: [WORK, CARRY, MOVE],
-        builder: [WORK, CARRY, MOVE],
-        upgrader: [WORK, CARRY, MOVE],
-        repairer: [WORK, CARRY, MOVE],
-        defender: [TOUGH, ATTACK, MOVE],
-        claimer: [CLAIM, MOVE],
-    };
-    const minBody = minBodyMap[role];
-    const minCost = minBody.reduce((sum, part) => sum + BODYPART_COST[part], 0);
+    const recipes = BODY_RECIPES[role];
+    const minBody = recipes[0];
+    const minCost = bodyCost(minBody);
     if (maxEnergy < minCost) {
         return null;
     }
     const body = [];
-    let budget = maxEnergy;
-    const patternCost = pattern.reduce((sum, part) => sum + BODYPART_COST[part], 0);
-    while (patternCost <= budget && body.length + pattern.length <= 50) {
-        for (const part of pattern) {
-            body.push(part);
-            budget -= BODYPART_COST[part];
+    let remainingEnergy = maxEnergy;
+    while (body.length < 50) {
+        let addedRecipe = false;
+        for (const recipe of recipes) {
+            const cost = bodyCost(recipe);
+            if (cost > remainingEnergy || body.length + recipe.length > 50) {
+                continue;
+            }
+            body.push(...recipe);
+            remainingEnergy -= cost;
+            addedRecipe = true;
+            break;
+        }
+        if (!addedRecipe) {
+            break;
         }
     }
     if (body.length === 0) {
@@ -84,17 +124,6 @@ function getBodyPartsForRole(role, room) {
         return null;
     }
     return body;
-}
-function countCreepsByRole(room) {
-    const counts = {};
-    for (const name in Game.creeps) {
-        const creep = Game.creeps[name];
-        if ((creep.memory.homeRoom || creep.room.name) !== room.name)
-            continue;
-        const role = creep.memory.role || 'harvester';
-        counts[role] = (counts[role] || 0) + 1;
-    }
-    return counts;
 }
 function findExpansionTarget(room) {
     const exits = Game.map.describeExits(room.name);
@@ -113,24 +142,22 @@ function findExpansionTarget(room) {
     }
     return null;
 }
-function desiredRoleCounts(room) {
-    const sources = room.find(FIND_SOURCES).length;
-    const constructionSites = room.find(FIND_CONSTRUCTION_SITES).length;
-    const damaged = room.find(FIND_STRUCTURES, {
+function desiredRoleCounts(room, metrics) {
+    const sources = metrics ? metrics.sourceCount : room.find(FIND_SOURCES).length;
+    const constructionSites = metrics ? metrics.constructionSites : room.find(FIND_CONSTRUCTION_SITES).length;
+    const damaged = metrics ? metrics.repairTargets : room.find(FIND_STRUCTURES, {
         filter: (structure) => structure.hits < structure.hitsMax && structure.structureType !== STRUCTURE_WALL && structure.structureType !== STRUCTURE_RAMPART,
     }).length;
-    const enemies = room.find(FIND_HOSTILE_CREEPS).length;
-    const controllerLevel = room.controller ? room.controller.level : 1;
-    const storedEnergy = room.find(FIND_STRUCTURES, {
+    const enemies = metrics ? metrics.hostileCount : room.find(FIND_HOSTILE_CREEPS).length;
+    const controllerLevel = metrics ? metrics.controllerLevel : (room.controller ? room.controller.level : 1);
+    const storedEnergy = metrics ? metrics.storedEnergy : room.find(FIND_STRUCTURES, {
         filter: (structure) => (structure.structureType === STRUCTURE_CONTAINER || structure.structureType === STRUCTURE_STORAGE) &&
             structure.store.getUsedCapacity(RESOURCE_ENERGY) > 0,
     }).reduce((sum, structure) => sum + structure.store.getUsedCapacity(RESOURCE_ENERGY), 0);
-    const spawnEnergyFree = room
-        .find(FIND_STRUCTURES, {
+    const spawnEnergyFree = metrics ? metrics.spawnEnergyFree : room.find(FIND_STRUCTURES, {
         filter: (structure) => (structure.structureType === STRUCTURE_SPAWN || structure.structureType === STRUCTURE_EXTENSION) &&
             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0,
-    })
-        .reduce((sum, structure) => sum + structure.store.getFreeCapacity(RESOURCE_ENERGY), 0);
+    }).reduce((sum, structure) => sum + structure.store.getFreeCapacity(RESOURCE_ENERGY), 0);
     const upgraderTarget = controllerLevel <= 2 ? 1 : storedEnergy >= 2000 ? 3 : storedEnergy >= 800 ? 2 : 1;
     const builderTarget = constructionSites > 0
         ? Math.max(1, Math.min(3, Math.ceil(constructionSites / 4)))
@@ -146,6 +173,27 @@ function desiredRoleCounts(room) {
         claimer: room.controller && room.controller.level >= 2 && findExpansionTarget(room) ? 1 : 0,
     };
     return desired;
+}
+function findGrowthReplacementRole(room, metrics) {
+    if (metrics.hostileCount > 0) {
+        return null;
+    }
+    if (metrics.energyCapacityAvailable < 550 && metrics.storedEnergy < 1000) {
+        return null;
+    }
+    const priorities = ['harvester', 'upgrader', 'builder', 'repairer', 'defender', 'claimer'];
+    for (const role of priorities) {
+        const bodyStats = metrics.roleBodyStats && metrics.roleBodyStats[role];
+        if (!bodyStats || bodyStats.count === 0)
+            continue;
+        const ideal = getIdealBodyPartCount(role, room);
+        if (ideal === 0)
+            continue;
+        if (bodyStats.maxBodyParts >= ideal)
+            continue;
+        return role;
+    }
+    return null;
 }
 function summarizeRuntimeErrors() {
     const mem = Memory;
@@ -327,14 +375,19 @@ function ensureSpawnsForRoom(room) {
     const spawns = room.find(FIND_MY_SPAWNS);
     if (spawns.length === 0)
         return;
-    const counts = countCreepsByRole(room);
-    const desired = desiredRoleCounts(room);
+    const metrics = (0, roomState_1.updateRoomMetrics)(room);
+    const counts = metrics.roles;
+    const desired = desiredRoleCounts(room, metrics);
     if ((counts.harvester || 0) === 0)
         desired.harvester = Math.max(desired.harvester, 1);
     if ((counts.upgrader || 0) === 0)
         desired.upgrader = Math.max(desired.upgrader, 1);
     if ((counts.builder || 0) === 0 && room.find(FIND_CONSTRUCTION_SITES).length > 0) {
         desired.builder = Math.max(desired.builder, 1);
+    }
+    const growthRole = findGrowthReplacementRole(room, metrics);
+    if (growthRole) {
+        desired[growthRole] = Math.max(desired[growthRole] || 0, (counts[growthRole] || 0) + 1);
     }
     const enemies = room.find(FIND_HOSTILE_CREEPS).length;
     const priorities = enemies > 0
