@@ -44,8 +44,8 @@ Updated by automated agent at 2026-08-13T23:12:50.8375385-04:00
 The `Check Screeps Status` GitHub Actions workflow runs every 15 minutes and compares
 the live account's rooms with [`config/screeps-status-projections.json`](config/screeps-status-projections.json).
 It requires an `SCREEPS_TOKEN` repository secret containing a Screeps API token.
-Replace the example `W0N0` projection with the rooms and controller-level targets for
-the live account before enabling the workflow.
+Replace the example `W0N0`/`shard3` projection with the room, shard, and controller-level
+targets for the live account before enabling the workflow.
 
 When a projection is below target, the workflow creates or updates a
 `screeps-status-deficit` issue. To supply executable agent feedback for a deficit,
