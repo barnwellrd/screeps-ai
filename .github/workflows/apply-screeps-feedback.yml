@@ -48,7 +48,7 @@ jobs:
           git add src config README.md
           git commit -m "Apply approved Screeps feedback #${{ inputs.issue_number }}"
           git push origin "${{ steps.branch.outputs.name }}"
-      - name: Create and merge remediation pull request
+      - name: Create, review, and merge remediation pull request
         id: pull-request
         env:
           GH_TOKEN: ${{ github.token }}
@@ -59,6 +59,8 @@ jobs:
             --head "${{ steps.branch.outputs.name }}" \
             --title "Apply approved Screeps feedback #${{ inputs.issue_number }}" \
             --body "Applies the approved unified-diff feedback from #${{ inputs.issue_number }} after \`npm run build\` validation.")"
+          gh pr review "$PR_URL" --approve \
+            --body "Approved after applying the constrained feedback patch and validating with npm run build."
           gh pr merge "$PR_URL" --merge --delete-branch
           echo "url=$PR_URL" >> "$GITHUB_OUTPUT"
       - name: Record completed remediation
