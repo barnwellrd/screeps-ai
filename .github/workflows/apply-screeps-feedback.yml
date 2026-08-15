@@ -30,7 +30,7 @@ jobs:
           git apply --check approved-feedback.patch
           git apply approved-feedback.patch
       - name: Install dependencies
-        run: npm ci
+        run: npm install
       - name: Validate changes
         run: npm run build
       - name: Create remediation branch
