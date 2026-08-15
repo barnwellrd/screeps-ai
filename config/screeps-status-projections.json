@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "host": "https://screeps.com",
+  "rooms": [
+    {
+      "name": "W0N0",
+      "requireActive": true,
+      "minControllerLevel": 1
+    }
+  ]
+}
