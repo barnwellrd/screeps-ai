@@ -1,4 +1,4 @@
-// BUILD_TIMESTAMP: 2026-08-15T14:32:28.725Z
+// BUILD_TIMESTAMP: 2026-08-15T23:52:48.815Z
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -43,7 +43,7 @@ function getMyUsername() {
     return null;
 }
 function getBodyPartsForRole(role, room) {
-    const maxEnergy = room.energyCapacityAvailable || room.energyAvailable || 300;
+    const maxEnergy = room.energyAvailable || 300;
     const patternMap = {
         harvester: [WORK, WORK, CARRY, MOVE],
         builder: [WORK, WORK, CARRY, MOVE],
