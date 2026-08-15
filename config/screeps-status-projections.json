@@ -4,6 +4,7 @@
   "rooms": [
     {
       "name": "W0N0",
+      "shard": "shard3",
       "requireActive": true,
       "minControllerLevel": 1
     }

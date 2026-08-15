@@ -36,6 +36,9 @@ function validateConfig(config) {
     if (!room || typeof room.name !== 'string' || room.name.length === 0) {
       throw new Error('Every projection must have a non-empty room name.');
     }
+    if (typeof room.shard !== 'string' || room.shard.length === 0) {
+      throw new Error(`Projection for ${room.name} must have a non-empty shard.`);
+    }
     if (
       room.minControllerLevel !== undefined &&
       (!Number.isInteger(room.minControllerLevel) ||
@@ -82,24 +85,81 @@ async function loadApprovedFeedback(apiUrl, headers) {
   return feedback;
 }
 
+async function loadLiveRooms(host, screepsToken, projections) {
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-Token': screepsToken
+  };
+  const ownedRoomsResponse = await getJson(`${host}/api/user/rooms`, { headers });
+  if (
+    ownedRoomsResponse.ok !== 1 ||
+    !ownedRoomsResponse.shards ||
+    typeof ownedRoomsResponse.shards !== 'object'
+  ) {
+    const error = typeof ownedRoomsResponse.error === 'string' ? ownedRoomsResponse.error : 'unknown error';
+    throw new Error(`Screeps user rooms request failed: ${error}.`);
+  }
+
+  const ownedRoomsByShard = new Map(
+    Object.entries(ownedRoomsResponse.shards).map(([shard, rooms]) => {
+      if (!Array.isArray(rooms) || rooms.some((room) => typeof room !== 'string')) {
+        throw new Error(`Screeps user rooms response has an invalid room list for ${shard}.`);
+      }
+      return [shard, new Set(rooms)];
+    })
+  );
+  const projectionsByShard = new Map();
+  for (const projection of projections) {
+    const shardProjections = projectionsByShard.get(projection.shard) ?? [];
+    shardProjections.push(projection);
+    projectionsByShard.set(projection.shard, shardProjections);
+  }
+  const liveRooms = new Map();
+
+  for (const [shard, shardProjections] of projectionsByShard) {
+    const mapStats = await getJson(`${host}/api/game/map-stats`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        rooms: shardProjections.map((projection) => projection.name),
+        shard,
+        statName: 'owner0'
+      })
+    });
+    if (mapStats.ok !== 1 || !mapStats.stats || typeof mapStats.stats !== 'object') {
+      const error = typeof mapStats.error === 'string' ? mapStats.error : 'unknown error';
+      throw new Error(`Screeps map stats request for ${shard} failed: ${error}.`);
+    }
+
+    for (const projection of shardProjections) {
+      const room = mapStats.stats[projection.name];
+      liveRooms.set(`${shard}:${projection.name}`, {
+        owned: ownedRoomsByShard.get(shard)?.has(projection.name) ?? false,
+        level: room?.own?.level,
+        status: room?.status
+      });
+    }
+  }
+  return liveRooms;
+}
+
 function findDeficits(projections, rooms) {
-  const roomsByName = new Map(rooms.map((room) => [room.name, room]));
   const deficits = [];
 
   for (const projection of projections) {
-    const room = roomsByName.get(projection.name);
-    if (!room) {
+    const room = rooms.get(`${projection.shard}:${projection.name}`);
+    if (!room?.owned) {
       deficits.push({
-        key: `${projection.name}:missing`,
+        key: `${projection.shard}:${projection.name}:missing`,
         room: projection.name,
-        message: 'The room is not present in the live account response.'
+        message: `The room is not claimed by the account on ${projection.shard}.`
       });
       continue;
     }
 
     if (projection.requireActive && room.status !== 'normal') {
       deficits.push({
-        key: `${projection.name}:inactive`,
+        key: `${projection.shard}:${projection.name}:inactive`,
         room: projection.name,
         message: `Expected an active room (status "normal"), but the live status is "${room.status ?? 'unknown'}".`
       });
@@ -113,7 +173,7 @@ function findDeficits(projections, rooms) {
       }
       if (room.level < projection.minControllerLevel) {
         deficits.push({
-          key: `${projection.name}:controller-level`,
+          key: `${projection.shard}:${projection.name}:controller-level`,
           room: projection.name,
           message: `Expected controller level ${projection.minControllerLevel} or higher, but live level is ${room.level}.`
         });
@@ -199,14 +259,8 @@ async function main() {
   }
 
   const host = (config.host ?? DEFAULT_HOST).replace(/\/$/, '');
-  const liveStatus = await getJson(`${host}/api/user/rooms`, {
-    headers: { 'X-Token': screepsToken }
-  });
-  if (!Array.isArray(liveStatus.rooms)) {
-    throw new Error('Screeps live status response did not contain a rooms array.');
-  }
-
-  const deficits = findDeficits(config.rooms, liveStatus.rooms);
+  const liveRooms = await loadLiveRooms(host, screepsToken, config.rooms);
+  const deficits = findDeficits(config.rooms, liveRooms);
   if (deficits.length === 0) {
     console.log('All Screeps room projections are being met.');
     return;
