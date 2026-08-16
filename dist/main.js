@@ -391,7 +391,7 @@ function ensureSpawnsForRoom(room) {
         desired.harvester = Math.max(desired.harvester, 1);
     if ((counts.upgrader || 0) === 0)
         desired.upgrader = Math.max(desired.upgrader, 1);
-    if ((counts.builder || 0) === 0 && room.find(FIND_CONSTRUCTION_SITES).length > 0) {
+    if ((counts.builder || 0) === 0 && metrics.constructionSites > 0) {
         desired.builder = Math.max(desired.builder, 1);
     }
     const growthRole = findGrowthReplacementRole(room, metrics);

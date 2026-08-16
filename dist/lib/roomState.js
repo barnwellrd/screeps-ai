@@ -5,8 +5,11 @@ exports.getRoomMetrics = getRoomMetrics;
 function updateRoomMetrics(room) {
     const roles = { harvester: 0, miner: 0, carrier: 0, builder: 0, upgrader: 0, guard: 0 };
     const roleBodyStats = {};
-    const creeps = room.find(FIND_MY_CREEPS);
-    for (const creep of creeps) {
+    for (const name in Game.creeps) {
+        const creep = Game.creeps[name];
+        const home = (creep.memory && creep.memory.homeRoom) || (creep.room && creep.room.name);
+        if (home !== room.name)
+            continue;
         const bodyParts = Array.isArray(creep.body) ? creep.body.length : 0;
         const role = (creep.memory && creep.memory.role) || 'harvester';
         roles[role] = (roles[role] || 0) + 1;
@@ -27,7 +30,9 @@ function updateRoomMetrics(room) {
     let spawnEnergyFree = 0;
     let repairTargets = 0;
     for (const structure of structures) {
-        if (structure.hits < structure.hitsMax * 0.7 && structure.structureType !== STRUCTURE_WALL) {
+        if (structure.hits < structure.hitsMax &&
+            structure.structureType !== STRUCTURE_WALL &&
+            structure.structureType !== STRUCTURE_RAMPART) {
             repairTargets++;
         }
         if (structure.structureType === STRUCTURE_CONTAINER || structure.structureType === STRUCTURE_STORAGE) {
