@@ -44,7 +44,11 @@ export function updateRoomMetrics(room: any): RoomMetrics {
   let spawnEnergyFree = 0;
   let repairTargets = 0;
   for (const structure of structures) {
-    if (structure.hits < structure.hitsMax * 0.7 && structure.structureType !== STRUCTURE_WALL) {
+    if (
+      structure.hits < structure.hitsMax &&
+      structure.structureType !== STRUCTURE_WALL &&
+      structure.structureType !== STRUCTURE_RAMPART
+    ) {
       repairTargets++;
     }
     if (structure.structureType === STRUCTURE_CONTAINER || structure.structureType === STRUCTURE_STORAGE) {
