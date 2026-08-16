@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getRoomMetrics = exports.updateRoomMetrics = void 0;
+exports.updateRoomMetrics = updateRoomMetrics;
+exports.getRoomMetrics = getRoomMetrics;
 function updateRoomMetrics(room) {
     const roles = { harvester: 0, miner: 0, carrier: 0, builder: 0, upgrader: 0, guard: 0 };
     const roleBodyStats = {};
@@ -57,11 +58,9 @@ function updateRoomMetrics(room) {
     mem.rooms[room.name] = metrics;
     return metrics;
 }
-exports.updateRoomMetrics = updateRoomMetrics;
 function getRoomMetrics(roomName) {
     const mem = Memory;
     if (!mem.rooms)
         return undefined;
     return mem.rooms[roomName];
 }
-exports.getRoomMetrics = getRoomMetrics;

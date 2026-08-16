@@ -72,7 +72,7 @@ function getIdealBodyPartCount(role: RoleName, room: Room): number {
 function getBodyPartsForRole(role: RoleName, room: Room): BodyPartConstant[] | null {
   const maxEnergy = room.energyCapacityAvailable || room.energyAvailable || 300;
   const recipes = BODY_RECIPES[role];
-  const minBody = recipes[0];
+  const minBody = recipes[recipes.length - 1];
   const minCost = bodyCost(minBody);
   if (maxEnergy < minCost) {
     return null;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.run = void 0;
+exports.run = run;
 function run(creep) {
     try {
         if (creep.store.getFreeCapacity(RESOURCE_ENERGY) === 0) {
@@ -36,4 +36,3 @@ function run(creep) {
         console.log(`miner ${creep.name} error: ${e}`);
     }
 }
-exports.run = run;

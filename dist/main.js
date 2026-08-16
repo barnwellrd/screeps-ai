@@ -1,4 +1,3 @@
-// BUILD_TIMESTAMP: 2026-08-15T23:52:51.811Z
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -16,15 +15,25 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loop = void 0;
+exports.loop = loop;
 const logger_1 = require("./lib/logger");
 const roleHarvester = __importStar(require("./roles/harvester"));
 const roleBuilder = __importStar(require("./roles/builder"));
@@ -92,7 +101,7 @@ function getIdealBodyPartCount(role, room) {
 function getBodyPartsForRole(role, room) {
     const maxEnergy = room.energyCapacityAvailable || room.energyAvailable || 300;
     const recipes = BODY_RECIPES[role];
-    const minBody = recipes[0];
+    const minBody = recipes[recipes.length - 1];
     const minCost = bodyCost(minBody);
     if (maxEnergy < minCost) {
         return null;
@@ -519,7 +528,6 @@ function loop() {
         console.log('Top-level loop error: ' + e);
     }
 }
-exports.loop = loop;
 ;
 module.exports.loop = loop;
 global.loop = loop;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.recordRuntimeError = void 0;
+exports.recordRuntimeError = recordRuntimeError;
 function normalizeError(error) {
     if (error instanceof Error) {
         return error.stack || error.message;
@@ -39,4 +39,3 @@ function recordRuntimeError(context) {
         message: normalizeError(context.error),
     });
 }
-exports.recordRuntimeError = recordRuntimeError;

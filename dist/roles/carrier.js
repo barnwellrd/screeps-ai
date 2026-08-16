@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.run = void 0;
+exports.run = run;
 function run(creep) {
     try {
         if (creep.store.getUsedCapacity(RESOURCE_ENERGY) === 0) {
@@ -42,4 +42,3 @@ function run(creep) {
         console.log(`carrier ${creep.name} error: ${e}`);
     }
 }
-exports.run = run;
