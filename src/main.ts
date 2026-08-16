@@ -20,7 +20,7 @@ function getMyUsername(): string | null {
 }
 
 function getBodyPartsForRole(role: RoleName, room: Room): BodyPartConstant[] | null {
-  const maxEnergy = room.energyAvailable || 300;
+  const maxEnergy = room.energyAvailable;
   const patternMap: Record<RoleName, BodyPartConstant[]> = {
     harvester: [WORK, WORK, CARRY, MOVE],
     builder: [WORK, WORK, CARRY, MOVE],
