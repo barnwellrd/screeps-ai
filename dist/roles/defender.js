@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.run = void 0;
+exports.run = run;
 const runtimeErrors_1 = require("./runtimeErrors");
 function run(creep) {
     try {
@@ -21,4 +21,3 @@ function run(creep) {
         console.log(`defender ${creep.name} error: ${e}`);
     }
 }
-exports.run = run;

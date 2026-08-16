@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tryAcquireEnergy = exports.updateWorkingState = void 0;
+exports.updateWorkingState = updateWorkingState;
+exports.tryAcquireEnergy = tryAcquireEnergy;
 function updateWorkingState(creep) {
     if (creep.memory.working === undefined) {
         creep.memory.working = false;
@@ -12,7 +13,6 @@ function updateWorkingState(creep) {
         creep.memory.working = true;
     }
 }
-exports.updateWorkingState = updateWorkingState;
 function tryAcquireEnergy(creep) {
     const structureTarget = creep.pos.findClosestByPath(FIND_STRUCTURES, {
         filter: (s) => (s.structureType == STRUCTURE_CONTAINER || s.structureType == STRUCTURE_STORAGE) &&
@@ -42,4 +42,3 @@ function tryAcquireEnergy(creep) {
     }
     return false;
 }
-exports.tryAcquireEnergy = tryAcquireEnergy;

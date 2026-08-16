@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.run = void 0;
+exports.run = run;
 const roomState_1 = require("../lib/roomState");
 function buildBody(maxEnergy, role) {
     const body = [];
@@ -74,4 +74,3 @@ function run() {
         }
     }
 }
-exports.run = run;
