@@ -403,7 +403,7 @@ function ensureSpawnsForRoom(room: Room) {
   const desired = desiredRoleCounts(room, metrics);
   if ((counts.harvester || 0) === 0) desired.harvester = Math.max(desired.harvester, 1);
   if ((counts.upgrader || 0) === 0) desired.upgrader = Math.max(desired.upgrader, 1);
-  if ((counts.builder || 0) === 0 && room.find(FIND_CONSTRUCTION_SITES).length > 0) {
+  if ((counts.builder || 0) === 0 && metrics.constructionSites > 0) {
     desired.builder = Math.max(desired.builder, 1);
   }
 
