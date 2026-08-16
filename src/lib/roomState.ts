@@ -17,12 +17,15 @@ export interface RoomMetrics {
 export function updateRoomMetrics(room: any): RoomMetrics {
   const roles: Record<string, number> = { harvester: 0, miner: 0, carrier: 0, builder: 0, upgrader: 0, guard: 0 };
   const roleBodyStats: Record<string, { count: number; bodyParts: number; minBodyParts: number; maxBodyParts: number }> = {};
-  const creeps = room.find(FIND_MY_CREEPS);
-  for (const creep of creeps) {
+  for (const name in Game.creeps) {
+    const creep: any = Game.creeps[name];
+    const home = (creep.memory && creep.memory.homeRoom) || (creep.room && creep.room.name);
+    if (home !== room.name) continue;
     const bodyParts = Array.isArray(creep.body) ? creep.body.length : 0;
     const role = (creep.memory && creep.memory.role) || 'harvester';
     roles[role] = (roles[role] || 0) + 1;
-    const existing = roleBodyStats[role] || { count: 0, bodyParts: 0, minBodyParts: Number.POSITIVE_INFINITY, maxBodyParts: 0 };
+    const existing =
+      roleBodyStats[role] || { count: 0, bodyParts: 0, minBodyParts: Number.POSITIVE_INFINITY, maxBodyParts: 0 };
     existing.count += 1;
     existing.bodyParts += bodyParts;
     existing.minBodyParts = Math.min(existing.minBodyParts, bodyParts);
