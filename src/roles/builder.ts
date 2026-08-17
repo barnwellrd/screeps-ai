@@ -1,11 +1,37 @@
+import { tryAcquireEnergy, updateWorkingState } from './workerEnergy';
+import { recordRuntimeError } from './runtimeErrors';
+
 export function run(creep: any) {
   try {
+    updateWorkingState(creep);
+    if (!creep.memory.working) {
+      tryAcquireEnergy(creep);
+      return;
+    }
+
     const target = (creep.pos as any).findClosestByPath(FIND_CONSTRUCTION_SITES as any) as any;
-    if (!target) return;
-    if ((creep.build as any)(target) == ERR_NOT_IN_RANGE) {
+    if (!target) {
+      const controller = (creep.room as any).controller as any;
+      if (controller) {
+        const upgradeResult = (creep.upgradeController as any)(controller);
+        if (upgradeResult == ERR_NOT_IN_RANGE) {
+          (creep.moveTo as any)(controller, { visualizePathStyle: { stroke: '#00ff99' } });
+        } else if (upgradeResult == ERR_NOT_ENOUGH_RESOURCES) {
+          creep.memory.working = false;
+        }
+      } else {
+        creep.memory.working = false;
+      }
+      return;
+    }
+    const buildResult = (creep.build as any)(target);
+    if (buildResult == ERR_NOT_IN_RANGE) {
       (creep.moveTo as any)(target, { visualizePathStyle: { stroke: '#00ff00' } });
+    } else if (buildResult == ERR_NOT_ENOUGH_RESOURCES) {
+      creep.memory.working = false;
     }
   } catch (e) {
+    recordRuntimeError({ creep: creep.name, role: 'builder', error: e });
     console.log(`builder ${creep.name} error: ${e}`);
   }
 }

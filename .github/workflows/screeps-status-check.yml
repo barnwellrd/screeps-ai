@@ -1,0 +1,22 @@
+name: Check Screeps Status
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check live Screeps status against projections
+        env:
+          SCREEPS_TOKEN: ${{ secrets.SCREEPS_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/check-screeps-status.mjs

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://raw.githubusercontent.com/github/copilot-schemas/main/copilot-environment.schema.json",
+  "name": "screeps-ai-scaffold-environment",
+  "description": "Custom Copilot environment for the Screeps AI scaffold",
+  "version": "1.0.0",
+  "extends": "node",
+  "environment": {
+    "image": "node:22-alpine",
+    "setup": [
+      "apk add --no-cache git",
+      "npm install -g npm@latest"
+    ],
+    "variables": {
+      "NODE_ENV": "development"
+    }
+  },
+  "packages": {
+    "manager": "npm",
+    "install": ["npm ci"]
+  },
+  "tools": {
+    "available": ["node", "npm", "npx", "git", "gh", "tsc"],
+    "paths": ["/usr/local/bin"]
+  },
+  "features": {
+    "typescript": {
+      "enabled": true,
+      "version": "latest",
+      "strict": true,
+      "tsconfig": "tsconfig.json"
+    }
+  },
+  "workspace": {
+    "type": "single-package",
+    "root": true
+  },
+  "documentation": {
+    "readme": "README.md",
+    "agents": "AGENTS.md"
+  }
+}
