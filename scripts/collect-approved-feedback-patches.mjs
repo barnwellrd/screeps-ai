@@ -60,7 +60,7 @@ async function main() {
   const token = requiredEnvironment('GITHUB_TOKEN');
   const headers = {
     Accept: 'application/vnd.github+json',
-    Authorization: `Bearer ${token}`,
+    Authorization: `token ${token}`,
     'X-GitHub-Api-Version': '2022-11-28'
   };
   const issueUrl = `https://api.github.com/repos/${repository}/issues/${issueNumber}`;

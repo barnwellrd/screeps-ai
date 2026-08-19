@@ -292,7 +292,7 @@ async function main() {
   const apiUrl = `https://api.github.com/repos/${owner}/${repo}`;
   const githubHeaders = {
     Accept: 'application/vnd.github+json',
-    Authorization: `Bearer ${githubToken}`,
+    Authorization: `token ${githubToken}`,
     'X-GitHub-Api-Version': '2022-11-28',
     'Content-Type': 'application/json'
   };
