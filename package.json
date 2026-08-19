@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "description": "Scaffold for integrating code with Screeps and deploying/syncing code to a Screeps server",
   "scripts": {
-    "build": "tsc -p tsconfig.json && node scripts/stamp-main-build.js",
+    "check:scripts": "node --check scripts/check-screeps-status.mjs && node --check scripts/collect-approved-feedback-patches.mjs",
+    "build": "npm run check:scripts && tsc -p tsconfig.json && node scripts/stamp-main-build.js",
     "predeploy": "npm run build",
     "deploy": "npx screeps upload --config screeps.json --path ./dist --branch default",
     "dev": "tsc -w -p tsconfig.json",
